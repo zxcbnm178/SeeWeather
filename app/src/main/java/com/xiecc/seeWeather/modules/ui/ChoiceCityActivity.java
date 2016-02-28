@@ -31,6 +31,7 @@ import rx.Observable;
 import rx.Observer;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Func0;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
@@ -39,7 +40,6 @@ import rx.schedulers.Schedulers;
  */
 public class ChoiceCityActivity extends BaseActivity {
     private static String TAG = ChoiceCityActivity.class.getSimpleName();
-
 
     private RecyclerView mRecyclerView;
     private ProgressBar mProgressBar;
@@ -120,33 +120,34 @@ public class ChoiceCityActivity extends BaseActivity {
      */
     private void queryProvinces() {
         collapsingToolbarLayout.setTitle("选择省份");
-        Observable.just(1)
-                  .subscribeOn(Schedulers.io())
-                  .observeOn(AndroidSchedulers.mainThread())
-                  .flatMap(new Func1<Integer, Observable<Province>>() {
-                      @Override public Observable<Province> call(Integer integer) {
-                          provincesList = mWeatherDB.loadProvinces(mDBManager.getDatabase());
-                          dataList.clear();
-                          return Observable.from(provincesList);
-                      }
-                  })
-                  .subscribe(new Observer<Province>() {
-                      @Override public void onCompleted() {
-                          currentLevel = LEVEL_PROVINCE;
-                          mAdapter.notifyDataSetChanged();
-                          mProgressBar.setVisibility(View.GONE);
-                      }
+        Observer<Province> observer = new Observer<Province>() {
+            @Override public void onCompleted() {
+                currentLevel = LEVEL_PROVINCE;
+                mAdapter.notifyDataSetChanged();
+                mProgressBar.setVisibility(View.GONE);
+            }
 
 
-                      @Override public void onError(Throwable e) {
+            @Override public void onError(Throwable e) {
 
-                      }
+            }
 
 
-                      @Override public void onNext(Province province) {
-                          dataList.add(province.ProName);
-                      }
-                  });
+            @Override public void onNext(Province province) {
+                dataList.add(province.ProName);
+            }
+        };
+
+        Observable.defer(new Func0<Observable<Province>>() {
+            @Override public Observable<Province> call() {
+                provincesList = mWeatherDB.loadProvinces(mDBManager.getDatabase());
+                dataList.clear();
+                return Observable.from(provincesList);
+            }
+        }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(observer);
+
+
+
     }
 
 
@@ -156,33 +157,34 @@ public class ChoiceCityActivity extends BaseActivity {
     private void queryCities() {
         dataList.clear();
         collapsingToolbarLayout.setTitle(selectedProvince.ProName);
-        Observable.just(1)
-                  .subscribeOn(Schedulers.io())
-                  .observeOn(AndroidSchedulers.mainThread())
-                  .flatMap(new Func1<Integer, Observable<City>>() {
-                      @Override public Observable<City> call(Integer integer) {
-                          cityList = mWeatherDB.loadCities(mDBManager.getDatabase(), selectedProvince.ProSort);
-                          return Observable.from(cityList);
-                      }
-                  })
-                  .subscribe(new Observer<City>() {
-                      @Override public void onCompleted() {
-                          currentLevel = LEVEL_CITY;
-                          mAdapter.notifyDataSetChanged();
-                          //定位到第一个item
-                          mRecyclerView.smoothScrollToPosition(0);
-                      }
+        Observer<City> observer = new Observer<City>() {
+            @Override public void onCompleted() {
+                currentLevel = LEVEL_CITY;
+                mAdapter.notifyDataSetChanged();
+                //定位到第一个item
+                mRecyclerView.smoothScrollToPosition(0);
+            }
 
 
-                      @Override public void onError(Throwable e) {
+            @Override public void onError(Throwable e) {
 
-                      }
+            }
 
 
-                      @Override public void onNext(City city) {
-                          dataList.add(city.CityName);
-                      }
-                  });
+            @Override public void onNext(City city) {
+                dataList.add(city.CityName);
+            }
+        };
+
+
+        Observable.defer(new Func0<Observable<City>>() {
+            @Override public Observable<City> call() {
+                cityList = mWeatherDB.loadCities(mDBManager.getDatabase(), selectedProvince.ProSort);
+                return Observable.from(cityList);
+            }
+        }).subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(observer);
     }
 
 

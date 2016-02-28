@@ -74,7 +74,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     private RelativeLayout headerBackground;
 
     private RecyclerView mRecyclerView;
-    //private Weather mWeatherData = null;
+    //private Weather mWeatherData = new Weather();
     private WeatherAdapter mAdapter;
     private Observer<Weather> observer;
 
@@ -144,7 +144,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         //recclerview
         mRecyclerView = (RecyclerView) findViewById(R.id.recyclerview);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
-
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.addOnScrollListener(new HidingScrollListener() {
             @Override public void onHide() {
@@ -159,6 +158,9 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                 fab.animate().translationY(0).setInterpolator(new DecelerateInterpolator(2)).start();
             }
         });
+        //mAdapter = new WeatherAdapter(MainActivity.this, mWeatherData);
+        //mRecyclerView.setAdapter(mAdapter);
+
     }
 
 
@@ -451,10 +453,11 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                 case 2:
                     if (mRefreshLayout.isRefreshing()) {
                         mRefreshLayout.setRefreshing(false);
-                        if (mAdapter.getItemCount()!=0){
+
+                        if (Util.isNetworkConnected(MainActivity.this)){
                             Snackbar.make(fab, "加载完毕，✺◟(∗❛ัᴗ❛ั∗)◞✺", Snackbar.LENGTH_SHORT).show();
                         }else {
-                            Snackbar.make(fab, "出了些问题？( ´△｀)", Snackbar.LENGTH_SHORT).show();
+                            Snackbar.make(fab, "网络出了些问题？( ´△｀)", Snackbar.LENGTH_SHORT).show();
                         }
                     }
                     break;

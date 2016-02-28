@@ -92,13 +92,14 @@ public class WeatherAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
                 ((NowWeatherViewHolder) holder).tempPm.setText("PM25： " + mWeatherData.aqi.city.pm25);
                 ((NowWeatherViewHolder) holder).tempQuality.setText("空气质量： " + mWeatherData.aqi.city.qlty);
+                Glide.with(mContext)
+                     .load(mSetting.getInt(mWeatherData.now.cond.txt, R.mipmap.none))
+                     .diskCacheStrategy(DiskCacheStrategy.ALL)
+                     .into(((NowWeatherViewHolder) holder).weatherIcon);
             } catch (Exception e) {
                 PLog.e(TAG, e.toString());
             }
-            Glide.with(mContext)
-                 .load(mSetting.getInt(mWeatherData.now.cond.txt, R.mipmap.none))
-                 .diskCacheStrategy(DiskCacheStrategy.ALL)
-                 .into(((NowWeatherViewHolder) holder).weatherIcon);
+
         }
         if (holder instanceof HoursWeatherViewHolder) {
             try {
