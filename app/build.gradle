@@ -20,6 +20,13 @@ android {
     }
 }
 
+repositories {
+    mavenLocal()
+    mavenCentral()
+    maven { url 'http://maven.oschina.net/content/groups/public/' }
+    jcenter()
+}
+
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
